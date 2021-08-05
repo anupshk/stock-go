@@ -31,6 +31,19 @@ func RunApp() error {
 	}
 	app.Commands = []*cli.Command{
 		{
+			Name:  "migrate",
+			Usage: "Migrate database",
+			Action: func(ctx *cli.Context) error {
+				err := Migrate()
+				if err != nil {
+					fmt.Println("Error migrating database")
+				} else {
+					fmt.Println("Database migrated to latest version")
+				}
+				return nil
+			},
+		},
+		{
 			Name:    "import",
 			Usage:   "Import stock csv",
 			Aliases: []string{"i"},

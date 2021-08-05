@@ -18,7 +18,7 @@ func Setup() error {
 	if dbErr != nil {
 		return dbErr
 	}
-	return CreateSchema()
+	return nil
 }
 
 func ConnectDB() error {
