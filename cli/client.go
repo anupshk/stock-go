@@ -9,18 +9,20 @@ import (
 )
 
 type Client struct {
-	Id   string `survey:"id"`
-	Name string `survey:"name"`
+	Id    int    `pg:",pk"`
+	Ident string `survey:"id" pg:",unique"`
+	Name  string `survey:"name"`
 }
 
 func AddClient() {
 	questions := []*survey.Question{
 		{
-			Name: "id",
+			Name: "ident",
 			Prompt: &survey.Input{
 				Message: "Client id?",
 			},
-			Validate: survey.Required,
+			Validate:  survey.Required,
+			Transform: survey.ToLower,
 		},
 		{
 			Name: "name",
@@ -51,7 +53,7 @@ func ListClients() {
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"ID", "Name"})
 	for _, v := range clients {
-		table.Append([]string{v.Id, v.Name})
+		table.Append([]string{v.Ident, v.Name})
 	}
 	table.Render()
 }
