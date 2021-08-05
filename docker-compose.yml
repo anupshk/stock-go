@@ -5,7 +5,7 @@ services:
     container_name: stock_pgsql
     restart: always
     ports:
-        - 5432:5432
+        - 5678:5432
     networks:
       - backend
     environment:
