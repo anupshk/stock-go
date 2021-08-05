@@ -39,11 +39,11 @@ func AddClient() {
 		fmt.Println(err.Error())
 		return
 	}
-	_, dbErr := InsertClient(&client)
+	dbRes, dbErr := InsertClient(&client)
 	if dbErr != nil {
 		fmt.Println("Error adding client", dbErr)
 	} else {
-		fmt.Println("Added client", client)
+		fmt.Println("Added client", dbRes)
 	}
 }
 

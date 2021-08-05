@@ -1,12 +1,18 @@
 package cli
 
 import (
-	"github.com/go-pg/pg/v10"
-	"github.com/go-pg/pg/v10/orm"
+	"context"
+	"time"
+
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var DB *pg.DB
+var DB *mongo.Database
+var DbClient *mongo.Client
+var Ctx context.Context
+var CancelFunc context.CancelFunc
 
 func Setup() error {
 	viper.SetConfigFile(".env")
@@ -22,29 +28,24 @@ func Setup() error {
 }
 
 func ConnectDB() error {
-	opt, err := pg.ParseURL(viper.GetString("DATABASE_URL"))
+	var err error
+	DbClient, err = mongo.NewClient(options.Client().ApplyURI(viper.GetString("DATABASE_URL")))
 	if err != nil {
 		return err
 	}
-	DB = pg.Connect(opt)
+	Ctx, CancelFunc = context.WithTimeout(context.Background(), 10*time.Second)
+	err = DbClient.Connect(Ctx)
+	if err != nil {
+		return err
+	}
+	err = DbClient.Ping(Ctx, nil)
+	if err != nil {
+		return err
+	}
+	DB = DbClient.Database("stock")
 	return nil
 }
 
 func CloseDB() error {
-	return DB.Close()
-}
-
-func CreateSchema() error {
-	models := []interface{}{
-		(*Client)(nil),
-	}
-	for _, model := range models {
-		err := DB.Model(model).CreateTable(&orm.CreateTableOptions{
-			IfNotExists: true,
-		})
-		if err != nil {
-			return err
-		}
-	}
-	return nil
+	return DbClient.Disconnect(Ctx)
 }

@@ -1,5 +1,5 @@
 package cli
 
 func Migrate() error {
-	return CreateSchema()
+	return nil
 }

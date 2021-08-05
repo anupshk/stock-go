@@ -1,2 +1,4 @@
 .env
 stock
+/mongo_data/*
+!/mongo_data/.gitkeep
