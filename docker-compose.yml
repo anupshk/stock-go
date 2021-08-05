@@ -1,0 +1,32 @@
+version: "3"
+services:
+  pgsql:
+    image: postgres:alpine
+    container_name: stock_pgsql
+    restart: always
+    ports:
+        - 5432:5432
+    networks:
+      - backend
+    environment:
+      - POSTGRES_PASSWORD=rootpassword
+    volumes:
+      - ./.docker/pgsql/init:/docker-entrypoint-initdb.d
+      - stock_data:/var/lib/postgresql/data
+  adminer:
+    image: adminer
+    container_name: stock_adminer
+    restart: always
+    environment:
+      - ADMINER_DEFAULT_SERVER=pgsql
+      - ADMINER_DESIGN=lucas-sandery
+      - ADMINER_PLUGINS=enum-types json-column edit-foreign
+    ports:
+      - 9876:8080
+    networks:
+      - backend
+networks:
+  backend:
+volumes:
+  stock_data:
+    external: true
