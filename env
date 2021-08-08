@@ -1,1 +1,1 @@
-DATABASE_URL=mongodb://127.0.0.1:27017/stock?w=majority
+DATABASE_URL=mongodb://stock_user:stock_pass@localhost:27017/stock?authSource=stock
