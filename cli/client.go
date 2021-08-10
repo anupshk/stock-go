@@ -6,12 +6,13 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/olekukonko/tablewriter"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Client struct {
-	Id    int    `pg:",pk"`
-	Ident string `survey:"id" pg:",unique"`
-	Name  string `survey:"name"`
+	Id    primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Ident string             `survey:"id" bson:"ident" json:"ident"`
+	Name  string             `survey:"name" bson:"name" json:"name"`
 }
 
 func AddClient() {
@@ -39,11 +40,11 @@ func AddClient() {
 		fmt.Println(err.Error())
 		return
 	}
-	dbRes, dbErr := InsertClient(&client)
+	_, dbErr := InsertClient(&client)
 	if dbErr != nil {
 		fmt.Println("Error adding client", dbErr)
 	} else {
-		fmt.Println("Added client", dbRes)
+		fmt.Println("Added client", client)
 	}
 }
 

@@ -4,3 +4,5 @@ stock
 !/mongo_data/.gitkeep
 /csv/*
 !/csv/.gitkeep
+/logs/*
+!/logs/.gitkeep

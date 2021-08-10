@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -44,6 +45,11 @@ func ConnectDB() error {
 	}
 	DB = DbClient.Database("stock")
 	return nil
+}
+
+func createIndexes() error {
+	cErr := AddUniqueIndex("clients", bson.M{"ident": 1})
+	return cErr
 }
 
 func CloseDB() error {

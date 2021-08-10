@@ -9,4 +9,6 @@ db.createUser(
         roles: [{ role: "readWrite", db: "stock" }],
         passwordDigestor: "server",
     }
-)
+);
+
+db.clients.createIndex({ "ident": 1 }, { unique: true });
