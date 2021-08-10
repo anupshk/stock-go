@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/spf13/viper"
+	"github.com/anupshk/stock/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -16,11 +16,6 @@ var Ctx context.Context
 var CancelFunc context.CancelFunc
 
 func Setup() error {
-	viper.SetConfigFile(".env")
-	configErr := viper.ReadInConfig()
-	if configErr != nil {
-		return configErr
-	}
 	dbErr := ConnectDB()
 	if dbErr != nil {
 		return dbErr
@@ -30,7 +25,7 @@ func Setup() error {
 
 func ConnectDB() error {
 	var err error
-	DbClient, err = mongo.NewClient(options.Client().ApplyURI(viper.GetString("DATABASE_URL")))
+	DbClient, err = mongo.NewClient(options.Client().ApplyURI(util.DATABASE_URL))
 	if err != nil {
 		return err
 	}

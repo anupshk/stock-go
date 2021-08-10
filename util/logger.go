@@ -3,7 +3,6 @@ package util
 import (
 	"log"
 	"os"
-	"time"
 )
 
 var (
@@ -13,7 +12,7 @@ var (
 )
 
 func init() {
-	logFile := "logs/" + time.Now().Format("2006-01-02") + "_logs.txt"
+	logFile := "logs/" + GetFormattedCurrentTime(DATE_FORMAT) + "_logs.txt"
 	file, err := os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)

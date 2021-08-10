@@ -47,8 +47,21 @@ func RunApp() error {
 			Name:    "import",
 			Usage:   "Import stock csv",
 			Aliases: []string{"i"},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "client",
+					Usage:    "Client ID",
+					Aliases:  []string{"c"},
+					Required: true,
+				},
+			},
 			Action: func(ctx *cli.Context) error {
-				Import()
+				client := ctx.String("client")
+				if client == "" {
+					fmt.Println("Client ID required")
+					return nil
+				}
+				Import(client)
 				return nil
 			},
 		},

@@ -41,3 +41,20 @@ func AddUniqueIndex(collection string, indexKeys interface{}) error {
 	util.InfoLogger.Println("Created index ", indexName)
 	return nil
 }
+
+func GetClient(ident string) (client Client, err error) {
+	client = Client{}
+	clientCollection := DB.Collection("clients")
+	err = clientCollection.FindOne(Ctx, bson.M{"ident": ident}).Decode(&client)
+	return
+}
+
+func InsertShares(shares []Share) (res *mongo.InsertManyResult, err error) {
+	list := make([]interface{}, len(shares))
+	for i, v := range shares {
+		list[i] = v
+	}
+	shareCollection := DB.Collection("shares")
+	res, err = shareCollection.InsertMany(Ctx, list)
+	return
+}

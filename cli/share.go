@@ -1,22 +1,14 @@
 package cli
 
-type Company struct {
-	Id     uint   `pg:",pk"`
-	Symbol string `pg:",unique"`
-	Name   string
-}
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Share struct {
-	Id         uint     `pg:",pk"`
-	Company    *Company `pg:"rel:has-one"`
-	PCP        float32
-	LTP        float32
-	ImportDate string `pg:"import_date"`
-}
-
-type ShareAmount struct {
-	Id         uint     `pg:",pk"`
-	Company    *Company `pg:"rel:has-one"`
-	ImportDate string   `pg:"import_date"`
-	Amount     uint
+	Id           primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	Client       primitive.ObjectID `bson:"client,omitempty" json:"client,omitempty"`
+	Symbol       string             `bson:"symbol" json:"symbol"`
+	Balance      float32            `bson:"balance" json:"balance"`
+	PCP          float32            `bson:"prev_close_price" json:"prev_close_price"`
+	LTP          float32            `bson:"last_tran_price" json:"last_tran_price"`
+	ImportedDate string             `bson:"imported_date" json:"imported_date"`
+	ImportedAt   primitive.DateTime `bson:"imported_at" json:"imported_at"`
 }
