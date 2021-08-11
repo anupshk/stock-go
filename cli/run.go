@@ -66,6 +66,28 @@ func RunApp() error {
 			},
 		},
 		{
+			Name:    "shares",
+			Usage:   "List shares",
+			Aliases: []string{"s"},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "client",
+					Usage:    "Client ID",
+					Aliases:  []string{"c"},
+					Required: true,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				client := ctx.String("client")
+				if client == "" {
+					fmt.Println("Client ID required")
+					return nil
+				}
+				ListShares(client)
+				return nil
+			},
+		},
+		{
 			Name:    "client",
 			Usage:   "Client options",
 			Aliases: []string{"c"},

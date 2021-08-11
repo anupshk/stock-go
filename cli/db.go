@@ -58,3 +58,15 @@ func InsertShares(shares []Share) (res *mongo.InsertManyResult, err error) {
 	res, err = shareCollection.InsertMany(Ctx, list)
 	return
 }
+
+func (client Client) GetShares() (shares []Share, err error) {
+	shareCollection := DB.Collection("shares")
+	filterCursor, err := shareCollection.Find(Ctx, bson.M{"client": client.Id})
+	if err != nil {
+		return
+	}
+	if err = filterCursor.All(Ctx, &shares); err != nil {
+		return
+	}
+	return
+}
