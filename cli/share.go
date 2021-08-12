@@ -3,7 +3,6 @@ package cli
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/anupshk/stock/util"
 	"github.com/olekukonko/tablewriter"
@@ -29,29 +28,12 @@ func ListShares(args ...string) {
 		fmt.Println("Error: Client not found")
 		return
 	}
-	var parsedDate string
+	var shares []Share
 	if date == "" {
-		latest, err := client.GetLastImportDate()
-		if err == nil {
-			latest_date := latest["last_date"]
-			if latest_date != nil {
-				parsedDate = fmt.Sprintf("%v", latest_date)
-			} else {
-				parsedDate = util.GetCurrentTime().String()
-			}
-		} else {
-			fmt.Println("Last import date error", err)
-		}
+		shares, err = client.GetLatestShares()
 	} else {
-		d, e := time.Parse(util.DATE_FORMAT, date)
-		if e != nil {
-			fmt.Println("Date format error", e)
-			return
-		} else {
-			parsedDate = d.String()
-		}
+		shares, err = client.GetShares(date)
 	}
-	shares, err := client.GetShares(parsedDate)
 	if err != nil {
 		fmt.Println("Error", err)
 	}

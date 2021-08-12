@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/anupshk/stock/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -59,15 +62,73 @@ func InsertShares(shares []Share) (res *mongo.InsertManyResult, err error) {
 	return
 }
 
-func (client Client) GetShares(date string) (shares []Share, err error) {
+func (client Client) GetLatestShares() (shares []Share, err error) {
+	latest, err := client.GetLastImportDate()
+	var parsedDate string
+	if err != nil {
+		return
+	}
+	latest_date := latest["last_date"]
+	if latest_date != nil {
+		parsedDate = fmt.Sprintf("%v", latest_date)
+	} else {
+		parsedDate = util.GetCurrentTime().String()
+	}
+
 	shareCollection := DB.Collection("shares")
 
 	filterCursor, err := shareCollection.Find(Ctx, bson.M{
-		"client": client.Id,
-		"imported_date": bson.M{
-			"$gte": date,
-		},
+		"client":        client.Id,
+		"imported_date": parsedDate,
 	})
+
+	if err != nil {
+		return
+	}
+	if err = filterCursor.All(Ctx, &shares); err != nil {
+		return
+	}
+	return
+}
+
+func (client Client) GetShares(date string) (shares []Share, err error) {
+	var d time.Time
+	d, err = time.Parse(util.DATE_FORMAT, date)
+	if err != nil {
+		return
+	}
+	parsedDate := d.Format(util.DATE_FORMAT)
+
+	shareCollection := DB.Collection("shares")
+
+	pipeline := bson.D{{
+		Key: "$match",
+		Value: bson.D{{
+			Key:   "client",
+			Value: client.Id,
+		}, {
+			Key: "$expr",
+			Value: bson.M{
+				"$eq": bson.A{
+					parsedDate,
+					bson.D{
+						{
+							Key: "$dateToString",
+							Value: bson.D{
+								{Key: "date", Value: "$imported_at"},
+								{Key: "format", Value: "%Y-%m-%d"},
+							},
+						},
+					},
+				},
+			},
+		}},
+	}}
+
+	// q, _ := json.Marshal(pipeline)
+	// fmt.Printf("q %s", q)
+
+	filterCursor, err := shareCollection.Aggregate(Ctx, mongo.Pipeline{pipeline})
 
 	if err != nil {
 		return
