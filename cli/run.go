@@ -54,6 +54,12 @@ func RunApp() error {
 					Aliases:  []string{"c"},
 					Required: true,
 				},
+				&cli.StringFlag{
+					Name:     "date",
+					Usage:    "Date",
+					Aliases:  []string{"d"},
+					Required: false,
+				},
 			},
 			Action: func(ctx *cli.Context) error {
 				client := ctx.String("client")
@@ -61,7 +67,35 @@ func RunApp() error {
 					fmt.Println("Client ID required")
 					return nil
 				}
-				Import(client)
+				date := ctx.String("date")
+				Import(client, date)
+				return nil
+			},
+		},
+		{
+			Name:    "export",
+			Usage:   "Export stock csv",
+			Aliases: []string{"e"},
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "client",
+					Usage:    "Client ID",
+					Aliases:  []string{"c"},
+					Required: true,
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				c := ctx.String("client")
+				if c == "" {
+					fmt.Println("Client ID required")
+					return nil
+				}
+				client, err := GetClient(c)
+				if err != nil {
+					fmt.Println("Client not found")
+					return nil
+				}
+				client.ExportShares()
 				return nil
 			},
 		},

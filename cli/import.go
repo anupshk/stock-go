@@ -5,12 +5,22 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/anupshk/stock/util"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func Import(ident string) {
+func Import(ident string, date string) {
+	var importedDate time.Time = util.GetCurrentTime()
+	var err error
+	if date != "" {
+		importedDate, err = time.Parse(date, util.DATE_FORMAT)
+	}
+	if err != nil {
+		fmt.Println("Invalid date format", err)
+		return
+	}
 	client, err := GetClient(ident)
 	if err != nil {
 		fmt.Println("Error: Client not found")
@@ -19,11 +29,11 @@ func Import(ident string) {
 	fmt.Println("Import csv", client)
 	files, err := util.GetAllCsv()
 	for _, file := range files {
-		saveToDB(client, file)
+		saveToDB(client, file, importedDate)
 	}
 }
 
-func saveToDB(client Client, file string) error {
+func saveToDB(client Client, file string, importedDate time.Time) error {
 	csvFile, err := os.Open(file)
 	if err != nil {
 		fmt.Println(err)
@@ -36,8 +46,9 @@ func saveToDB(client Client, file string) error {
 		fmt.Println(err)
 		return err
 	}
-	now := primitive.NewDateTimeFromTime(util.GetCurrentTime())
-	date := util.GetFormattedCurrentTime(util.DATETIME_FORMAT)
+
+	now := primitive.NewDateTimeFromTime(importedDate)
+	date := importedDate.Format(util.DATETIME_FORMAT)
 	for i, line := range csvLines {
 		if i == 0 || i == len(csvLines)-1 {
 			continue
