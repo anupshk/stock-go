@@ -76,6 +76,12 @@ func RunApp() error {
 					Aliases:  []string{"c"},
 					Required: true,
 				},
+				&cli.StringFlag{
+					Name:     "date",
+					Usage:    "Imported Date (eg.: 2021-01-25)",
+					Aliases:  []string{"d"},
+					Required: false,
+				},
 			},
 			Action: func(ctx *cli.Context) error {
 				client := ctx.String("client")
@@ -83,7 +89,8 @@ func RunApp() error {
 					fmt.Println("Client ID required")
 					return nil
 				}
-				ListShares(client)
+				date := ctx.String("date")
+				ListShares(client, date)
 				return nil
 			},
 		},

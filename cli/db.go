@@ -59,14 +59,57 @@ func InsertShares(shares []Share) (res *mongo.InsertManyResult, err error) {
 	return
 }
 
-func (client Client) GetShares() (shares []Share, err error) {
+func (client Client) GetShares(date string) (shares []Share, err error) {
 	shareCollection := DB.Collection("shares")
-	filterCursor, err := shareCollection.Find(Ctx, bson.M{"client": client.Id})
+
+	filterCursor, err := shareCollection.Find(Ctx, bson.M{
+		"client": client.Id,
+		"imported_date": bson.M{
+			"$gte": date,
+		},
+	})
+
 	if err != nil {
 		return
 	}
 	if err = filterCursor.All(Ctx, &shares); err != nil {
 		return
+	}
+	return
+}
+
+func (client Client) GetLastImportDate() (latest map[string]interface{}, err error) {
+	shareCollection := DB.Collection("shares")
+	matchStage := bson.D{{
+		Key: "$match",
+		Value: bson.D{{
+			Key:   "client",
+			Value: client.Id,
+		}},
+	}}
+	groupStage := bson.D{{
+		Key: "$group",
+		Value: bson.D{{
+			Key:   "_id",
+			Value: "$client",
+		}, {
+			Key: "last_date",
+			Value: bson.D{{
+				Key:   "$max",
+				Value: "$imported_date",
+			}},
+		}},
+	}}
+	cursor, err := shareCollection.Aggregate(Ctx, mongo.Pipeline{matchStage, groupStage})
+	if err != nil {
+		return
+	}
+	var res []bson.M
+	if err = cursor.All(Ctx, &res); err != nil {
+		return
+	}
+	if len(res) > 0 {
+		latest = res[0]
 	}
 	return
 }

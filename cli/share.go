@@ -3,7 +3,9 @@ package cli
 import (
 	"fmt"
 	"os"
+	"time"
 
+	"github.com/anupshk/stock/util"
 	"github.com/olekukonko/tablewriter"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -19,19 +21,43 @@ type Share struct {
 	ImportedAt   primitive.DateTime `bson:"imported_at" json:"imported_at"`
 }
 
-func ListShares(ident string) {
+func ListShares(args ...string) {
+	ident := args[0]
+	date := args[1]
 	client, err := GetClient(ident)
 	if err != nil {
 		fmt.Println("Error: Client not found")
 		return
 	}
-	shares, err := client.GetShares()
+	var parsedDate string
+	if date == "" {
+		latest, err := client.GetLastImportDate()
+		if err == nil {
+			latest_date := latest["last_date"]
+			if latest_date != nil {
+				parsedDate = fmt.Sprintf("%v", latest_date)
+			} else {
+				parsedDate = util.GetCurrentTime().String()
+			}
+		} else {
+			fmt.Println("Last import date error", err)
+		}
+	} else {
+		d, e := time.Parse(util.DATE_FORMAT, date)
+		if e != nil {
+			fmt.Println("Date format error", e)
+			return
+		} else {
+			parsedDate = d.String()
+		}
+	}
+	shares, err := client.GetShares(parsedDate)
 	if err != nil {
 		fmt.Println("Error", err)
 	}
 	table := tablewriter.NewWriter(os.Stdout)
 	var pcpVal, ltpVal float32 = 0.0, 0.0
-	table.SetHeader([]string{"S.No.", "Scrip", "Balance", "PCP", "PCP Value", "LTP", "LTP Value"})
+	table.SetHeader([]string{"S.No.", "Date", "Scrip", "Balance", "PCP", "PCP Value", "LTP", "LTP Value"})
 	for i, v := range shares {
 		pcpV := v.Balance * v.PCP
 		ltpV := v.Balance * v.LTP
@@ -39,6 +65,7 @@ func ListShares(ident string) {
 		ltpVal += ltpV
 		table.Append([]string{
 			fmt.Sprintf("%d", i+1),
+			util.GetDisplayDate(v.ImportedDate),
 			v.Symbol,
 			fmt.Sprintf("%0.2f", v.Balance),
 			fmt.Sprintf("%0.2f", v.PCP),
@@ -48,6 +75,7 @@ func ListShares(ident string) {
 		})
 	}
 	table.SetFooter([]string{
+		"",
 		"",
 		"",
 		"",

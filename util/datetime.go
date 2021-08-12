@@ -16,3 +16,8 @@ func GetCurrentTime() time.Time {
 func GetFormattedCurrentTime(format string) string {
 	return GetCurrentTime().Format(format)
 }
+
+func GetDisplayDate(datetime string) string {
+	d, _ := time.Parse(DATETIME_FORMAT, datetime)
+	return d.Format(DATE_FORMAT)
+}
