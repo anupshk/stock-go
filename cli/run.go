@@ -44,6 +44,28 @@ func RunApp() error {
 			},
 		},
 		{
+			Name:  "graph",
+			Usage: "Graph View",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:     "client",
+					Usage:    "Client ID",
+					Aliases:  []string{"c"},
+					Required: true,
+				},
+				&cli.StringFlag{
+					Name:    "scrip",
+					Aliases: []string{"s"},
+				},
+			},
+			Action: func(ctx *cli.Context) error {
+				client := ctx.String("client")
+				scrip := ctx.String("scrip")
+				StockValueSummaryGraph(client, scrip)
+				return nil
+			},
+		},
+		{
 			Name:    "import",
 			Usage:   "Import stock csv",
 			Aliases: []string{"i"},

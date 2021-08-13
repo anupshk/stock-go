@@ -6,3 +6,5 @@ stock
 !/csv/.gitkeep
 /logs/*
 !/logs/.gitkeep
+/graphs/*
+!/graphs/.gitkeep

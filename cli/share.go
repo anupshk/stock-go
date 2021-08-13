@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/anupshk/stock/util"
 	"github.com/olekukonko/tablewriter"
@@ -18,6 +19,11 @@ type Share struct {
 	LTP          float32            `bson:"last_tran_price" json:"last_tran_price"`
 	ImportedDate string             `bson:"imported_date" json:"imported_date"`
 	ImportedAt   primitive.DateTime `bson:"imported_at" json:"imported_at"`
+}
+
+type ShareValue struct {
+	Id    time.Time `bson:"_id,omitempty" json:"_id,omitempty"`
+	Value float32   `bson:"total" json:"total"`
 }
 
 func ListShares(args ...string) {

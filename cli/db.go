@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/anupshk/stock/util"
@@ -171,6 +172,87 @@ func (client Client) GetLastImportDate() (latest map[string]interface{}, err err
 	}
 	if len(res) > 0 {
 		latest = res[0]
+	}
+	return
+}
+
+func (client Client) GetStockValueSummary(scrip string) (res []ShareValue, err error) {
+	shareCollection := DB.Collection("shares")
+
+	matchStage := bson.D{{}}
+	groupStage := bson.D{{}}
+
+	if scrip == "" {
+		matchStage = bson.D{{
+			Key: "$match",
+			Value: bson.D{{
+				Key:   "client",
+				Value: client.Id,
+			}},
+		}}
+		groupStage = bson.D{{
+			Key: "$group",
+			Value: bson.D{{
+				Key:   "_id",
+				Value: "$imported_at",
+			}, {
+				Key: "total",
+				Value: bson.D{{
+					Key: "$sum",
+					Value: bson.D{{
+						Key:   "$multiply",
+						Value: bson.A{"$last_tran_price", "$balance"},
+					}},
+				}},
+			}},
+		}}
+	} else {
+		scrip = strings.ToUpper(scrip)
+		matchStage = bson.D{{
+			Key: "$match",
+			Value: bson.D{{
+				Key: "$and",
+				Value: bson.A{
+					bson.D{{
+						Key:   "client",
+						Value: client.Id,
+					}},
+				},
+			}},
+		}}
+		groupStage = bson.D{{
+			Key: "$group",
+			Value: bson.D{{
+				Key:   "_id",
+				Value: "$imported_at",
+			}, {
+				Key: "total",
+				Value: bson.D{{
+					Key: "$sum",
+					Value: bson.D{{
+						Key:   "$multiply",
+						Value: bson.A{"$last_tran_price", "$balance"},
+					}},
+				}},
+			}},
+		}}
+	}
+
+	sortStage := bson.D{{
+		Key: "$sort",
+		Value: bson.D{{
+			Key:   "_id",
+			Value: 1,
+		}},
+	}}
+	// q, _ := json.Marshal(groupStage)
+	// fmt.Printf("q %s", q)
+	cursor, err := shareCollection.Aggregate(Ctx, mongo.Pipeline{matchStage, groupStage, sortStage})
+	if err != nil {
+		return
+	}
+	if err = cursor.All(Ctx, &res); err != nil {
+		return
 	}
 	return
 }
