@@ -217,6 +217,10 @@ func (client Client) GetStockValueSummary(scrip string) (res []ShareValue, err e
 						Key:   "client",
 						Value: client.Id,
 					}},
+					bson.D{{
+						Key:   "symbol",
+						Value: scrip,
+					}},
 				},
 			}},
 		}}
@@ -228,11 +232,8 @@ func (client Client) GetStockValueSummary(scrip string) (res []ShareValue, err e
 			}, {
 				Key: "total",
 				Value: bson.D{{
-					Key: "$sum",
-					Value: bson.D{{
-						Key:   "$multiply",
-						Value: bson.A{"$last_tran_price", "$balance"},
-					}},
+					Key:   "$first",
+					Value: "$last_tran_price",
 				}},
 			}},
 		}}
