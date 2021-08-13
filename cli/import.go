@@ -15,10 +15,10 @@ func Import(ident string, date string) {
 	var importedDate time.Time = util.GetCurrentTime()
 	var err error
 	if date != "" {
-		importedDate, err = time.Parse(date, util.DATE_FORMAT)
+		importedDate, err = time.Parse(util.DATE_FORMAT, date)
 	}
 	if err != nil {
-		fmt.Println("Invalid date format", err)
+		fmt.Println("Invalid date ", date, err)
 		return
 	}
 	client, err := GetClient(ident)
