@@ -23,7 +23,7 @@ type Share struct {
 
 type ShareValue struct {
 	Id    time.Time `bson:"_id,omitempty" json:"_id,omitempty"`
-	Value float32   `bson:"total" json:"total"`
+	Value float32   `bson:"total,truncate" json:"total"`
 }
 
 func ListShares(args ...string) {
