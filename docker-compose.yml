@@ -1,7 +1,7 @@
 version: "3"
 services:
   mongo:
-    image: mongo
+    image: mongo:7.0.5
     container_name: stock_mongo
     restart: always
     environment:
@@ -14,7 +14,7 @@ services:
       - ./mongo_data:/data/db
       - ./.docker/mongo/:/docker-entrypoint-initdb.d/
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.2-20-alpine3.19
     container_name: stock_mongo_exp
     restart: always
     environment:
